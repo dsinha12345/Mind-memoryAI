@@ -35,7 +35,9 @@ export default function HomeScreen() {
               style={styles.headerLogo}
               resizeMode="contain"
             />
-            <ThemedText style={styles.headerLogoText}>
+          </View>
+          <View style={styles.titleContainer}>
+            <ThemedText style={[styles.headerTitleText]} numberOfLines={1}>
               Mind-MemoryAI
             </ThemedText>
           </View>
@@ -145,12 +147,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 8,
   },
+  titleContainer: { // Container for the centered title
+    flex: 1, // Allows it to take up the middle space
+    justifyContent: 'center',
+    alignItems: 'center', // Center the container's content (the text)
+    marginHorizontal: 5, // Optional spacing
+  },
   loginButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
     elevation: 2,
     boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+  },
+  headerTitleText: { // Style for the centered title text
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center', // Ensure text centers itself if container is wider
+    // Color applied inline
   },
   loginButtonPressed: {
     opacity: 0.8,
@@ -175,10 +189,6 @@ const styles = StyleSheet.create({
   mainLogo: {
     width: '70%',
     height: 200,
-  },
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: 10,
   },
   subtitle: {
     textAlign: 'center',
