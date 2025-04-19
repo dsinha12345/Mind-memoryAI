@@ -2,8 +2,7 @@
 import React, { useState } from 'react';
 import {StyleSheet,View,Image,TextInput,TouchableOpacity,KeyboardAvoidingView,Platform,ScrollView,ActivityIndicator } from 'react-native';
 import CustomAlertModal from '@/components/ui/CustomAlertModal';
-import { VerificationCodeModal } from '@/components/ui/verificationModal'; // Import the verification modal
-// Import specific auth functions directly from 'aws-amplify/auth'
+import { VerificationCodeModal } from '@/components/ui/verificationModal'; 
 import { signIn, signUp, confirmSignUp } from 'aws-amplify/auth'; // <--- CORRECTED IMPORT
 
 import { ThemedText } from '@/components/ThemedText';
@@ -20,8 +19,8 @@ export default function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false); // <-- Add loading state back
-  const [verificationCode, setVerificationCode] = useState<string>('');
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [userNeedingVerification, setUserNeedingVerification] = useState<string | null>(null); // Ensure this state exists
+
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
@@ -51,81 +50,155 @@ export default function AuthScreen() {
       showModal('Error', 'Please fill in all required fields');
       return;
     }
-  
+
     if (!isLogin && password !== confirmPassword) {
       showModal('Error', 'Passwords do not match');
       return;
     }
-  
+
     setIsLoading(true);
-  
+    // Clear previous verification target at the start of a new attempt
+    setUserNeedingVerification(null);
+
     try {
       if (isLogin) {
+        // --- Login Flow ---
         const { isSignedIn, nextStep } = await signIn({ username: email, password });
-  
+
         if (isSignedIn) {
+          // Successful Login
+          setUserNeedingVerification(null); // Clear target
+          setPassword(''); // Clear password field
           showModal('Success', 'Logged in!', [{
             text: 'OK',
             onPress: () => {
               setModalVisible(false);
-              router.replace('/(tabs)');
+              router.replace('/profile');
             },
           }]);
         } else {
-          showModal('Login Pending', `Next step: ${nextStep.signInStep}`);
+          // Login attempt resolved, but user is not fully signed in yet.
+          // --- MODIFICATION START ---
+          // Check if the specific reason is needing confirmation
+          if (nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
+            console.log("signIn resolved but requires CONFIRM_SIGN_UP step. Showing verification modal.");
+            setUserNeedingVerification(email); // Set the user needing verification
+            setIsVerificationModalVisible(true); // Show the verification modal
+            setPassword(''); // Clear password field for security
+          }
+          // --- MODIFICATION END ---
+          else {
+            // Handle other potential next steps (e.g., MFA, custom challenge)
+             console.warn('Login Pending - Other Step:', nextStep);
+             setPassword(''); // Clear password field
+             // Provide a generic message or one based on the actual step
+            showModal('Login Pending', `Further action required: ${nextStep?.signInStep || 'Unknown step'}`);
+          }
         }
-  
+
       } else {
+        // --- Registration Flow ---
+        // Set user needing verification *before* calling signUp
+        setUserNeedingVerification(email);
         const { isSignUpComplete, nextStep } = await signUp({
           username: email,
           password,
           options: {
             userAttributes: { email, name },
+            // autoSignIn: true // Consider if you want auto-signin after confirmation
           }
         });
-  
+
         if (nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
-          // Instead of showing the alert modal, show the verification code modal
+          // Standard registration flow needing confirmation
           setIsVerificationModalVisible(true);
-          // Optionally, you could clear the password fields here for security
-          // setPassword('');
-          // setConfirmPassword('');
+          // Clear passwords
+          setPassword('');
+          setConfirmPassword('');
         } else if (isSignUpComplete) {
-          // If sign up is complete without verification (e.g., auto-verify enabled in Cognito)
+          // Sign up complete (e.g., auto-verified)
+          setUserNeedingVerification(null); // Clear target
           showModal('Success', 'Account created! You can now log in.', [{
             text: 'OK',
             onPress: () => {
               setModalVisible(false);
               setIsLogin(true); // Switch to login view
-              // Clear fields after successful registration
               setPassword('');
               setConfirmPassword('');
               setName('');
-              // Keep email if you want them to log in immediately
+              // Email is kept
             },
           }]);
         } else {
-          // Handle other unexpected next steps if necessary
-          showModal('Registration Pending', `Next step: ${nextStep.signUpStep}`);
+          // Unexpected step during registration
+          setUserNeedingVerification(null); // Clear target
+          showModal('Registration Pending', `Unexpected step: ${nextStep.signUpStep}`);
         }
       }
     } catch (err: any) {
-      let friendlyMessage = 'An unexpected error occurred.';
-      if (err?.message) friendlyMessage = err.message;
-  
-      if (err.name === 'UserNotFoundException' || err.name === 'NotAuthorizedException') {
-        friendlyMessage = 'Incorrect email or password.';
+      // --- Catch Block (Simplified and handles actual exceptions) ---
+      console.error("Authentication error caught:", err);
+
+      let friendlyMessage = 'An unexpected error occurred. Please try again.';
+      let shouldShowVerificationModalInCatch = false;
+
+      // Explicitly check for the exception too, just in case behavior varies
+      if (err.name === 'UserNotConfirmedException') {
+          console.log("Caught UserNotConfirmedException exception.");
+          // This might be redundant if the try block handles CONFIRM_SIGN_UP step,
+          // but good as a fallback.
+          if (isLogin) { // Only trigger modal from catch if it was a login attempt
+            shouldShowVerificationModalInCatch = true;
+            setUserNeedingVerification(email);
+          } else {
+            // If exception happens during sign up, it's unusual
+             friendlyMessage = 'Account confirmation issue during sign-up. Please try registering again.';
+             setUserNeedingVerification(null);
+          }
+          setPassword(''); // Clear password on this error
+          setConfirmPassword(''); // Clear confirm too
+      } else if (err.name === 'UserNotFoundException' || err.name === 'NotAuthorizedException') {
+          friendlyMessage = 'Incorrect email or password.';
+          setPassword('');
+          setUserNeedingVerification(null);
       } else if (err.name === 'UsernameExistsException') {
-        friendlyMessage = 'An account with this email already exists.';
+          friendlyMessage = 'An account with this email already exists.';
+          setUserNeedingVerification(null);
       } else if (err.name === 'InvalidPasswordException') {
-        friendlyMessage = 'Password does not meet the requirements.';
-      } else if (err.name === 'UserNotConfirmedException') {
-        friendlyMessage = 'Account not confirmed. Please check your email.';
+          friendlyMessage = 'Password does not meet the requirements.';
+          setPassword('');
+          setConfirmPassword('');
+          setUserNeedingVerification(null);
+      } else if (err.name === 'LimitExceededException') {
+          friendlyMessage = 'Attempt limit exceeded. Please try again later.';
+          setPassword('');
+          setUserNeedingVerification(null);
+      } else if (err.code === 'NetworkError') {
+           friendlyMessage = 'Network error. Please check your connection.';
+           setUserNeedingVerification(null);
+      } else if (err?.message) {
+          friendlyMessage = err.message; // Use Amplify's message as fallback
+          setUserNeedingVerification(null);
       }
-  
-      showModal('Authentication Error', friendlyMessage);
+
+       // Clear sensitive fields on any error from catch block
+       setPassword('');
+       setConfirmPassword('');
+
+
+      // Show appropriate modal *after* processing the error
+      if (shouldShowVerificationModalInCatch) {
+          setIsVerificationModalVisible(true);
+      } else {
+          // Don't show generic error if verification modal was shown in the try block
+          if (!isVerificationModalVisible) {
+             showModal('Authentication Error', friendlyMessage);
+          }
+      }
+      // --- End Catch Block ---
+
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Ensure loader stops regardless of path
     }
   };
   
@@ -143,32 +216,22 @@ export default function AuthScreen() {
     setIsLoading(true);
   
     try {
-      await confirmSignUp({ username: email, confirmationCode: codeFromModal }); // Use codeFromModal
+      await confirmSignUp({ username: email, confirmationCode: codeFromModal }); 
   
-      // ---- MODIFICATION START ----
-      setIsVerificationModalVisible(false); // Hide the verification modal first
-      // THEN show the success alert
+      setIsVerificationModalVisible(false); 
       showModal('Success', 'Account confirmed! You can now log in.', [{
         text: 'OK',
         onPress: () => {
           setModalVisible(false); // Hide the alert modal
           setIsLogin(true); // Switch to login view
-          // Clear fields related to verification/registration if needed
-          // setVerificationCode(''); // If you had this state
           setPassword('');
           setConfirmPassword('');
           setName('');
-          // Keep email populated for login convenience
         },
       }]);
-      // ---- MODIFICATION END ----
+
   
     } catch (err: any) {
-      // ---- IMPROVEMENT: Also hide verification modal on error ----
-      // It might be better to keep the verification modal open on error
-      // so the user can retry, but hide the loader first.
-      // Let's keep it simple: show alert, modal stays open until explicitly closed.
-      // setIsVerificationModalVisible(false); // Optional: Hide on error too?
   
       let friendlyMessage = 'An error occurred during verification.';
       if (err?.code === 'CodeMismatchException') {
