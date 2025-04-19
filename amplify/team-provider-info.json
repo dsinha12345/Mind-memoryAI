@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-mindmemoryai-dev-9a754-authRole",
+      "UnauthRoleArn": "arn:aws:iam::302263058739:role/amplify-mindmemoryai-dev-9a754-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::302263058739:role/amplify-mindmemoryai-dev-9a754-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-mindmemoryai-dev-9a754-deployment",
+      "UnauthRoleName": "amplify-mindmemoryai-dev-9a754-unauthRole",
+      "StackName": "amplify-mindmemoryai-dev-9a754",
+      "StackId": "arn:aws:cloudformation:us-east-1:302263058739:stack/amplify-mindmemoryai-dev-9a754/4e058d70-1c55-11f0-983a-0e3655456a4d",
+      "AmplifyAppId": "dm2n4hcg5gf8n"
+    },
+    "categories": {
+      "auth": {
+        "mindmemoryaicb15c6ab": {}
+      }
+    }
+  }
+}

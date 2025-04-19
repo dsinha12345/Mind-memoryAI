@@ -90,7 +90,7 @@ export default function HomeScreen() {
         <ThemedView style={styles.contentBlock}>
           <ThemedText type="subtitle">What We Offer:</ThemedText>
           <ThemedText style={styles.listItem}>
-            • <ThemedText type="defaultSemiBold">Predictive Insights:</ThemedText> Analyzing MRI scans to understand and predict working memory development in children.
+            • <ThemedText type="defaultSemiBold">Predictive Insights:</ThemedText> Assessments to understand cognitive domain values in children.
           </ThemedText>
           <ThemedText style={styles.listItem}>
             • <ThemedText type="defaultSemiBold">Personalized Content:</ThemedText> Dynamically generating multimodal learning materials tailored to individual needs using RAG.
