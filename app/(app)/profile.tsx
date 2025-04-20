@@ -2,7 +2,6 @@
 import React, { useState, ComponentProps } from 'react';
 import { StyleSheet, View, TouchableOpacity, Image, ScrollView,Dimensions,Animated,Platform} from 'react-native';
 import { useRouter } from 'expo-router';
-import { signOut } from 'aws-amplify/auth';
 import { Ionicons } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -82,21 +81,8 @@ export default function ProfileScreen() {
       ]).start();
     }
   };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      showModal('Success', 'You have been logged out.', [{
-        text: 'OK',
-        onPress: () => {
-          setModalVisible(false);
-          router.replace('/');
-        },
-      }]);
-    } catch (error) {
-      console.error('Error signing out:', error);
-      showModal('Error', 'Failed to sign out. Please try again.');
-    }
+  const goToCompleteProfile = () => {
+    router.push('/completeprofile'); // Navigate to the new screen
   };
 
   // Drawer menu options
@@ -115,11 +101,6 @@ export default function ProfileScreen() {
       icon: 'help-circle-outline', // Inferred as 'help-circle-outline', not string
       title: 'Help & Support',
       onPress: () => console.log('Navigate to help')
-    },
-    {
-      icon: 'log-out-outline', // Inferred as 'log-out-outline', not string
-      title: 'Logout',
-      onPress: handleLogout
     },
   ] as const;
 
@@ -173,6 +154,24 @@ export default function ProfileScreen() {
             <ThemedText style={styles.statLabel}>Progress</ThemedText>
           </View>
         </ThemedView>
+        {/* --- ADDED: Complete Profile Section --- */}
+        {/* Conditionally show this section if profile isn't complete */}
+        {!userData.isProfileComplete && (
+            <View style={styles.sectionContainer}>
+                 <ThemedText type="subtitle" style={styles.sectionTitle}>Complete Your Profile</ThemedText>
+                 <View style={[styles.actionCard, { backgroundColor: cardColor }]}>
+                    <Ionicons name="person-add-outline" size={48} color={textColor} style={{ opacity: 0.5 }} />
+                    <ThemedText style={styles.actionCardText}>Add more details to personalize your experience.</ThemedText>
+                    <TouchableOpacity
+                        style={[styles.actionButton, { backgroundColor: tintColor }]}
+                        onPress={goToCompleteProfile} // Navigate on press
+                    >
+                        <ThemedText style={styles.actionButtonText}>Complete Profile</ThemedText>
+                    </TouchableOpacity>
+                 </View>
+            </View>
+        )}
+        {/* --- END: Complete Profile Section --- */}
 
         {/* Recent Activity Section */}
         <ThemedView style={styles.sectionContainer}>
@@ -489,5 +488,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     opacity: 0.5,
+  },
+  actionCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 30,
+    borderRadius: 10,
+    boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.1)',
+    elevation: 3,
+  },
+  actionCardText: {
+    textAlign: 'center',
+    marginVertical: 15,
+    opacity: 0.7,
+  },
+  actionButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
