@@ -24,6 +24,7 @@ function AppStackLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="profile" />
       {/* Add other authenticated screens here */}
+      <Stack.Screen name="completeprofile" />
     </Stack>
   );
 }
