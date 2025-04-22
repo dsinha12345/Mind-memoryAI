@@ -2,9 +2,110 @@
 # all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
 input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
 
-type Memory @model {
-  id: ID!
-  title: String!
-  content: String
-  createdAt: AWSDateTime
+enum UserRole {
+INSTRUCTOR
+STUDENT
+ADMIN # Optional: Consider if you need an admin role
+}
+
+type Institution @model @auth(rules: [
+# Allow public read? Or only signed-in users? Let's restrict to signed-in users.
+{ allow: private, operations: [read], provider: userPools },
+# Allow users in an 'Admin' Cognito group to do everything
+{ allow: groups, groups: ["Admin"], operations: [create, read, update, delete] }
+]) {
+id: ID!
+name: String!
+address: String
+createdAt: AWSDateTime
+updatedAt: AWSDateTime
+users: [User] @hasMany(indexName: "byInstitution", fields: ["id"])
+courses: [Course] @hasMany(indexName: "byInstitution", fields: ["id"])
+}
+
+type User @model @auth(rules: [
+  { allow: owner }
+  { allow: groups, groups: ["Admin"] }
+]) {
+id: ID! # Set automatically to Cognito User Pool Sub
+username: String! @index(name: "byUsername", queryField: "userByUsername") # From Cognito
+name: String! # Likely set during signup or first profile update
+email: String! # From Cognito
+role: UserRole!
+institutionID: ID! @index(name: "byInstitution", queryField: "usersByInstitution")
+institution: Institution @belongsTo(fields: ["institutionID"])
+
+# Profile Fields
+dateOfBirth: AWSDate
+location: String
+bio: String
+# Add other profile fields here
+
+# Relationships (Amplify generates resolvers based on these)
+coursesTaught: [Course] @hasMany(indexName: "byInstructor", fields: ["id"]) # For Instructors
+enrollments: [Enrollment] @hasMany(indexName: "byUser", fields: ["id"]) # For Students
+
+createdAt: AWSDateTime
+updatedAt: AWSDateTime
+# owner field isn't explicitly needed if using id as ownerField and Cognito default auth
+}
+
+type Course @model @auth(rules: [
+# Any authenticated user can read courses
+{ allow: private, operations: [read], provider: userPools },
+# Only Instructors or Admins can create/update/delete courses
+{ allow: groups, groups: ["Instructor", "Admin"], operations: [create, read, update, delete] }
+]) {
+id: ID!
+name: String!
+description: String
+institutionID: ID! @index(name: "byInstitution", queryField: "coursesByInstitution")
+institution: Institution @belongsTo(fields: ["institutionID"])
+# Assume Course creator (Instructor) ID is needed
+instructorID: ID! @index(name: "byInstructor", queryField: "coursesByInstructor")
+instructor: User @belongsTo(fields: ["instructorID"])
+
+materials: [Material] @hasMany(indexName: "byCourse", fields: ["id"])
+enrollments: [Enrollment] @hasMany(indexName: "byCourse", fields: ["id"])
+
+createdAt: AWSDateTime
+updatedAt: AWSDateTime
+}
+
+type Material @model @auth(rules: [
+# Authenticated users can read material (students need this)
+{ allow: private, operations: [read], provider: userPools },
+# How to allow only the instructor of the course or Admin to CUD?
+# Option 1 (Simpler but less secure): Allow any Instructor/Admin CUD
+{ allow: groups, groups: ["Instructor", "Admin"], operations: [create, read, update, delete] }
+# Option 2 (More secure): Use custom logic / functions / owner field based on Course's instructor - more complex setup needed.
+# Let's start with Option 1.
+]) {
+id: ID!
+name: String!
+description: String
+url: String! # Link to S3 object (configure Amplify Storage)
+courseID: ID! @index(name: "byCourse", queryField: "materialsByCourse")
+course: Course @belongsTo(fields: ["courseID"])
+createdAt: AWSDateTime
+updatedAt: AWSDateTime
+}
+
+type Enrollment @model @auth(rules: [
+# Student (owner) can read/delete their own enrollment. Maybe only delete? Read via User/Course.
+{ allow: owner, ownerField: "userID", operations: [read, delete] },
+# Instructor of the course / Admin should be able to manage/read enrollments
+# This requires more advanced rules or custom logic. Let's allow Instructor/Admin groups broadly for now.
+{ allow: groups, groups: ["Instructor", "Admin"], operations: [create, read, update, delete] }
+]) {
+id: ID!
+# Use userID/courseID as primary fields for the many-to-many link
+userID: ID! @index(name: "byUser", queryField: "enrollmentsByUser", sortKeyFields: ["courseID"])
+courseID: ID! @index(name: "byCourse", queryField: "enrollmentsByCourse", sortKeyFields: ["userID"])
+user: User! @belongsTo(fields: ["userID"])
+course: Course! @belongsTo(fields: ["courseID"])
+enrollmentDate: AWSDateTime!
+
+createdAt: AWSDateTime
+updatedAt: AWSDateTime
 }
