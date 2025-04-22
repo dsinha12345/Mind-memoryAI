@@ -8,54 +8,564 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const createMemory = /* GraphQL */ `mutation CreateMemory(
-  $input: CreateMemoryInput!
-  $condition: ModelMemoryConditionInput
+export const createInstitution = /* GraphQL */ `mutation CreateInstitution(
+  $input: CreateInstitutionInput!
+  $condition: ModelInstitutionConditionInput
 ) {
-  createMemory(input: $input, condition: $condition) {
+  createInstitution(input: $input, condition: $condition) {
     id
-    title
-    content
+    name
+    address
     createdAt
     updatedAt
+    users {
+      nextToken
+      __typename
+    }
+    courses {
+      nextToken
+      __typename
+    }
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateMemoryMutationVariables,
-  APITypes.CreateMemoryMutation
+  APITypes.CreateInstitutionMutationVariables,
+  APITypes.CreateInstitutionMutation
 >;
-export const updateMemory = /* GraphQL */ `mutation UpdateMemory(
-  $input: UpdateMemoryInput!
-  $condition: ModelMemoryConditionInput
+export const updateInstitution = /* GraphQL */ `mutation UpdateInstitution(
+  $input: UpdateInstitutionInput!
+  $condition: ModelInstitutionConditionInput
 ) {
-  updateMemory(input: $input, condition: $condition) {
+  updateInstitution(input: $input, condition: $condition) {
     id
-    title
-    content
+    name
+    address
     createdAt
     updatedAt
+    users {
+      nextToken
+      __typename
+    }
+    courses {
+      nextToken
+      __typename
+    }
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateMemoryMutationVariables,
-  APITypes.UpdateMemoryMutation
+  APITypes.UpdateInstitutionMutationVariables,
+  APITypes.UpdateInstitutionMutation
 >;
-export const deleteMemory = /* GraphQL */ `mutation DeleteMemory(
-  $input: DeleteMemoryInput!
-  $condition: ModelMemoryConditionInput
+export const deleteInstitution = /* GraphQL */ `mutation DeleteInstitution(
+  $input: DeleteInstitutionInput!
+  $condition: ModelInstitutionConditionInput
 ) {
-  deleteMemory(input: $input, condition: $condition) {
+  deleteInstitution(input: $input, condition: $condition) {
     id
-    title
-    content
+    name
+    address
+    createdAt
+    updatedAt
+    users {
+      nextToken
+      __typename
+    }
+    courses {
+      nextToken
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteInstitutionMutationVariables,
+  APITypes.DeleteInstitutionMutation
+>;
+export const createUser = /* GraphQL */ `mutation CreateUser(
+  $input: CreateUserInput!
+  $condition: ModelUserConditionInput
+) {
+  createUser(input: $input, condition: $condition) {
+    id
+    username
+    name
+    email
+    role
+    institutionID
+    institution {
+      id
+      name
+      address
+      createdAt
+      updatedAt
+      __typename
+    }
+    dateOfBirth
+    location
+    bio
+    coursesTaught {
+      nextToken
+      __typename
+    }
+    enrollments {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateUserMutationVariables,
+  APITypes.CreateUserMutation
+>;
+export const updateUser = /* GraphQL */ `mutation UpdateUser(
+  $input: UpdateUserInput!
+  $condition: ModelUserConditionInput
+) {
+  updateUser(input: $input, condition: $condition) {
+    id
+    username
+    name
+    email
+    role
+    institutionID
+    institution {
+      id
+      name
+      address
+      createdAt
+      updatedAt
+      __typename
+    }
+    dateOfBirth
+    location
+    bio
+    coursesTaught {
+      nextToken
+      __typename
+    }
+    enrollments {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateUserMutationVariables,
+  APITypes.UpdateUserMutation
+>;
+export const deleteUser = /* GraphQL */ `mutation DeleteUser(
+  $input: DeleteUserInput!
+  $condition: ModelUserConditionInput
+) {
+  deleteUser(input: $input, condition: $condition) {
+    id
+    username
+    name
+    email
+    role
+    institutionID
+    institution {
+      id
+      name
+      address
+      createdAt
+      updatedAt
+      __typename
+    }
+    dateOfBirth
+    location
+    bio
+    coursesTaught {
+      nextToken
+      __typename
+    }
+    enrollments {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUserMutationVariables,
+  APITypes.DeleteUserMutation
+>;
+export const createCourse = /* GraphQL */ `mutation CreateCourse(
+  $input: CreateCourseInput!
+  $condition: ModelCourseConditionInput
+) {
+  createCourse(input: $input, condition: $condition) {
+    id
+    name
+    description
+    institutionID
+    institution {
+      id
+      name
+      address
+      createdAt
+      updatedAt
+      __typename
+    }
+    instructorID
+    instructor {
+      id
+      username
+      name
+      email
+      role
+      institutionID
+      dateOfBirth
+      location
+      bio
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+    materials {
+      nextToken
+      __typename
+    }
+    enrollments {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteMemoryMutationVariables,
-  APITypes.DeleteMemoryMutation
+  APITypes.CreateCourseMutationVariables,
+  APITypes.CreateCourseMutation
+>;
+export const updateCourse = /* GraphQL */ `mutation UpdateCourse(
+  $input: UpdateCourseInput!
+  $condition: ModelCourseConditionInput
+) {
+  updateCourse(input: $input, condition: $condition) {
+    id
+    name
+    description
+    institutionID
+    institution {
+      id
+      name
+      address
+      createdAt
+      updatedAt
+      __typename
+    }
+    instructorID
+    instructor {
+      id
+      username
+      name
+      email
+      role
+      institutionID
+      dateOfBirth
+      location
+      bio
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+    materials {
+      nextToken
+      __typename
+    }
+    enrollments {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCourseMutationVariables,
+  APITypes.UpdateCourseMutation
+>;
+export const deleteCourse = /* GraphQL */ `mutation DeleteCourse(
+  $input: DeleteCourseInput!
+  $condition: ModelCourseConditionInput
+) {
+  deleteCourse(input: $input, condition: $condition) {
+    id
+    name
+    description
+    institutionID
+    institution {
+      id
+      name
+      address
+      createdAt
+      updatedAt
+      __typename
+    }
+    instructorID
+    instructor {
+      id
+      username
+      name
+      email
+      role
+      institutionID
+      dateOfBirth
+      location
+      bio
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+    materials {
+      nextToken
+      __typename
+    }
+    enrollments {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCourseMutationVariables,
+  APITypes.DeleteCourseMutation
+>;
+export const createMaterial = /* GraphQL */ `mutation CreateMaterial(
+  $input: CreateMaterialInput!
+  $condition: ModelMaterialConditionInput
+) {
+  createMaterial(input: $input, condition: $condition) {
+    id
+    name
+    description
+    url
+    courseID
+    course {
+      id
+      name
+      description
+      institutionID
+      instructorID
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateMaterialMutationVariables,
+  APITypes.CreateMaterialMutation
+>;
+export const updateMaterial = /* GraphQL */ `mutation UpdateMaterial(
+  $input: UpdateMaterialInput!
+  $condition: ModelMaterialConditionInput
+) {
+  updateMaterial(input: $input, condition: $condition) {
+    id
+    name
+    description
+    url
+    courseID
+    course {
+      id
+      name
+      description
+      institutionID
+      instructorID
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateMaterialMutationVariables,
+  APITypes.UpdateMaterialMutation
+>;
+export const deleteMaterial = /* GraphQL */ `mutation DeleteMaterial(
+  $input: DeleteMaterialInput!
+  $condition: ModelMaterialConditionInput
+) {
+  deleteMaterial(input: $input, condition: $condition) {
+    id
+    name
+    description
+    url
+    courseID
+    course {
+      id
+      name
+      description
+      institutionID
+      instructorID
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteMaterialMutationVariables,
+  APITypes.DeleteMaterialMutation
+>;
+export const createEnrollment = /* GraphQL */ `mutation CreateEnrollment(
+  $input: CreateEnrollmentInput!
+  $condition: ModelEnrollmentConditionInput
+) {
+  createEnrollment(input: $input, condition: $condition) {
+    id
+    userID
+    courseID
+    user {
+      id
+      username
+      name
+      email
+      role
+      institutionID
+      dateOfBirth
+      location
+      bio
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+    course {
+      id
+      name
+      description
+      institutionID
+      instructorID
+      createdAt
+      updatedAt
+      __typename
+    }
+    enrollmentDate
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateEnrollmentMutationVariables,
+  APITypes.CreateEnrollmentMutation
+>;
+export const updateEnrollment = /* GraphQL */ `mutation UpdateEnrollment(
+  $input: UpdateEnrollmentInput!
+  $condition: ModelEnrollmentConditionInput
+) {
+  updateEnrollment(input: $input, condition: $condition) {
+    id
+    userID
+    courseID
+    user {
+      id
+      username
+      name
+      email
+      role
+      institutionID
+      dateOfBirth
+      location
+      bio
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+    course {
+      id
+      name
+      description
+      institutionID
+      instructorID
+      createdAt
+      updatedAt
+      __typename
+    }
+    enrollmentDate
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateEnrollmentMutationVariables,
+  APITypes.UpdateEnrollmentMutation
+>;
+export const deleteEnrollment = /* GraphQL */ `mutation DeleteEnrollment(
+  $input: DeleteEnrollmentInput!
+  $condition: ModelEnrollmentConditionInput
+) {
+  deleteEnrollment(input: $input, condition: $condition) {
+    id
+    userID
+    courseID
+    user {
+      id
+      username
+      name
+      email
+      role
+      institutionID
+      dateOfBirth
+      location
+      bio
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+    course {
+      id
+      name
+      description
+      institutionID
+      instructorID
+      createdAt
+      updatedAt
+      __typename
+    }
+    enrollmentDate
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteEnrollmentMutationVariables,
+  APITypes.DeleteEnrollmentMutation
 >;
